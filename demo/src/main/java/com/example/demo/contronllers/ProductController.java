@@ -57,19 +57,25 @@ public class ProductController {
 
     @PutMapping("/{id}")
     ResponseEntity<ResponseObject> updateProduct(@RequestBody Product newProduct, @PathVariable Long id) {
-        Product updateProduct = repository.findById(id)
-                .map(product -> {
-                    product.setProductName(newProduct.getProductName());
-                    product.setYear(newProduct.getYear());
-                    product.setPrice(newProduct.getPrice());
-                    product.setCompany(newProduct.getCompany());
-                    return repository.save(product);
-                }).orElseGet(() -> {
-                    newProduct.setId(id);
-                    return repository.save(newProduct);
-                });
-        return ResponseEntity.status(HttpStatus.OK).body(
-                new ResponseObject("OK", "Update product successfully", updateProduct)
+        boolean exits = repository.existsById(id);
+        if (exits) {
+            Product updateProduct = repository.findById(id)
+                    .map(product -> {
+                        product.setProductName(newProduct.getProductName());
+                        product.setYear(newProduct.getYear());
+                        product.setPrice(newProduct.getPrice());
+                        product.setCompany(newProduct.getCompany());
+                        return repository.save(product);
+                    }).orElseGet(() -> {
+                        newProduct.setId(id);
+                        return repository.save(newProduct);
+                    });
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK", "Update product successfully", updateProduct)
+            );
+        }
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                new ResponseObject("FAILED", "Cannot find product to update", "")
         );
     }
 
@@ -82,7 +88,7 @@ public class ProductController {
                     new ResponseObject("OK", "Delete product successfully", "")
             );
         }
-        return ResponseEntity.status(HttpStatus.OK).body(
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                 new ResponseObject("FAILED", "Cannot find product to delete", "")
         );
     }
